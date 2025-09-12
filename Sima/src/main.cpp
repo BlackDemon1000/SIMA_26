@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#define S_RXD 18
-#define S_TXD 19
+#define S_RXD 16
+#define S_TXD 17
 
 
 #include <SCServo.h>
