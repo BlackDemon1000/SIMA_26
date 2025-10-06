@@ -3,37 +3,19 @@
 
 SCSCL sc;
 
-void setup()
-{
+void setup() {
   Serial.begin(1000000);   
   sc.pSerial = &Serial;    
   delay(1000);
 }
 
-void moveAndCheck(uint8_t id, int ziel)
-{
-  sc.WritePos(id, ziel, 0, 1500);
-  delay(754); //temp
+void loop() {
+  // Positionen berechnet für 1 Meter Fahrt
+  long posLinks  = 13020;  // Servo 4
+  long posRechts = -13020; // Servo 5
 
-  int ist = sc.ReadPos(id);
-  Serial.print("Servo ");
-  Serial.print(id);
-  Serial.print(" Ziel: ");
-  Serial.print(ziel);
-  Serial.print(" Ist: ");
-  Serial.println(ist);
+  sc.WritePos(4, posLinks, 0, 1500);   // linker Motor
+  sc.WritePos(5, posRechts, 0, 1500);  // rechter Motor
 
-  //Nachregeln
-  if (abs(ist - ziel) > 10) { // tol anpassen
-    Serial.println("Abweichung erkannt, nachregeln...");
-    sc.WritePos(id, ziel, 0, 1500);
-  }
+  while(1); // einmal fahren, dann stoppen
 }
-
-void loop()
-{
-  moveAndCheck(4, 1000);
-  moveAndCheck(5, 20);
-  delay(1000);
-}
-
