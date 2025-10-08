@@ -1,21 +1,21 @@
 #include <Arduino.h>
 #include <SCServo.h>
 
-SCSCL sc;
+SMS_STS st;
+
+const int right = 4;
+const int left  = 5;
 
 void setup() {
   Serial.begin(1000000);
-  sc.pSerial = &Serial;    
+  st.pSerial = &Serial;
   delay(1000);
 
-  sc.WritePos(4, 0, 0, 500);
-  sc.WritePos(5, 0, 0, 500);
-  delay(1000);
 }
 
 void loop() {
-  int speed = 300;  // Positiv = vorwärts, Negativ = rückwärts
-  sc.Run(4, speed, 0);  // Servo 4 läuft vorwärts
-  sc.Run(5, -speed, 0); // Servo 5 läuft rückwärts  
+  st.WriteSpe(right, 100, 0);
+  st.WriteSpe(left, 100, 0);
+
   while(1); // nur einmal fahren
 }
