@@ -17,19 +17,9 @@ long cmToTicks(float cm) {
   return (long)(ticks + 0.5); // runden
 }
 
-
-void setup() {
-  Serial.begin(1000000); 
-  st.pSerial = &Serial;  
-  delay(1000);
-
-  st.WheelMode(right);
-  st.WheelMode(left);
-}
-
-void loop() {
-  // Ziel: 100 cm (1 Meter)
-  long targetTicks = cmToTicks(100.0); // ergibt ~13038
+void driveDistance(int cm , int speed) {
+   // Ziel: 100 cm (1 Meter)
+  long targetTicks = cmToTicks(cm); 
 
   // Reset / Anfangspositionen
   long startPosRight = st.ReadPos(right);
@@ -41,13 +31,13 @@ void loop() {
   unsigned long posLeftGes  = 0;
 
   // Starte Motoren (Geschwindigkeit anpassen)
-  int speedRight = 2000; // Beispielwerte, anpassen
-  int speedLeft  = 2000;
+  int speedRight = speed; // Beispielwerte, anpassen
+  int speedLeft  = speed;
 
   st.WriteSpe(right, speedRight, 0);
   st.WriteSpe(left, -speedLeft, 0); // ggf. Vorzeichen an Orientierung anpassen
 
-  // Fahr-Schleife
+  // Fahr-Schleife ANPASSEN
   while (posRightGes < (unsigned long)targetTicks) {
     int newPosRight = st.ReadPos(right);
     int newPosLeft  = st.ReadPos(left);
@@ -74,9 +64,19 @@ void loop() {
   // Stoppe Motoren
   st.WriteSpe(right, 0, 0);
   st.WriteSpe(left, 0, 0);
+}
 
-  // Ende: Lampe an
-  digitalWrite(13, HIGH);
+void setup() {
+  Serial.begin(1000000); 
+  st.pSerial = &Serial;  
+  delay(1000);
+
+  st.WheelMode(right);
+  st.WheelMode(left);
+}
+
+void loop() {
+  driveDistance(100, 2200);
 
   // Einmal fahren: beenden
   while (1) { delay(1000); }
