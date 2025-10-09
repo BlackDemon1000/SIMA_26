@@ -83,6 +83,23 @@ void driveDistance(int cm, int baseSpeed) {
   st.WriteSpe(left, 0, 0);
 }
 
+void turn(bool dir, int angle) {
+  long timetoturn = angle * 1000 / 90; // Zeit in ms für die Drehung (hier 90° in 1s)
+  if (dir)
+  {
+    st.WriteSpe(right, 2200, 0);
+    st.WriteSpe(left, -2200, 0);
+  }
+  else
+  {
+    st.WriteSpe(right, -2200, 0);
+    st.WriteSpe(left, 2200, 0);
+  }
+  delay(timetoturn);
+  st.WriteSpe(right, 0, 0);
+  st.WriteSpe(left, 0, 0);
+}
+
 void setup() {
   Serial.begin(1000000); 
   st.pSerial = &Serial;  
