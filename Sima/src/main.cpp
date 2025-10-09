@@ -1,10 +1,5 @@
 #include <Arduino.h>
-#include <SCServo.h>
-
-SMS_STS st;
-
-const int right = 4;
-const int left  = 5;
+#include "drive.h"
 
 void setup() {
   Serial.begin(1000000); 
@@ -16,7 +11,6 @@ void setup() {
 }
 
 void loop() {
-  st.WriteSpe(right, 2200, 0);
-  st.WriteSpe(left, 2200, 0);
-  while(1);
+  driveDistance(100, 2200);
+  while (1) { delay(1000); }
 }
