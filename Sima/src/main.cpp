@@ -1,38 +1,68 @@
+#include <Arduino.h>
 #include <SCServo.h>
+
 SMS_STS st;
 
-// the uart used to control servos.
-// GPIO 18 - S_RXD, GPIO 19 - S_TXD, as default.
-#define S_RXD 18    //Customize the IO of the serial port, if you don't use the custom serial port below Serial1.begin(1000000, SERIAL_8N1, S_RXD, S_TXD); you need to change to Serial1.begin(1000000);.
-#define S_TXD 19
+// ESP32 NodeMCU V2 – Serial1 Pins (frei wählbar)
+// Waveshare Board: TX → GPIO16 (RX1), RX → GPIO17 (TX1)
+#define S_RXD 16
+#define S_TXD 17
 
-byte ID[2];
-s16 Position[2];
-u16 Speed[2];
-byte ACC[2];
+const int LED = 2; // Onboard LED ESP32 NodeMCU V2
 
-void setup()
-{
-  Serial1.begin(1000000, SERIAL_8N1, S_RXD, S_TXD);
+int foundIDs[20];
+int foundCount = 0;
+
+void setup() {
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
+
+  Serial.begin(115200);       // Monitor über USB
+  Serial1.begin(1000000, SERIAL_8N1, S_RXD, S_TXD); // Servo-Bus
   st.pSerial = &Serial1;
   delay(1000);
-  ID[0] = 1;   // Save the servo ID to be controlled to ID[].
-  ID[1] = 2;   //Save the servo ID to be controlled to ID[].
-  Speed[0] = 3400;  // Set the servo speed, Speed[0] corresponds to the servo with ID[0] above.
-  Speed[1] = 3400;  // Set the servo speed, Speed[1] corresponds to the servo with ID[1] above.
-  ACC[0] = 50;   // Set the start/stop acceleration, the lower the value the lower the acceleration, and the maximum can be set to 150.
-  ACC[1] = 50;
+
+  Serial.println("=== Servo Scan gestartet ===");
+
+  for (int id = 1; id <= 253; id++) {
+    int found = st.Ping(id);
+    if (found != -1) {
+      foundIDs[foundCount++] = found;
+      Serial.print(">>> Motor gefunden! ID: ");
+      Serial.println(found);
+    }
+    delay(10);
+  }
+
+  Serial.println("=== Scan abgeschlossen ===");
+
+  if (foundCount == 0) {
+    Serial.println("Keine Motoren gefunden! Verkabelung pruefen.");
+    // Schnelles Blinken
+    for (int i = 0; i < 20; i++) {
+      digitalWrite(LED, HIGH); delay(100);
+      digitalWrite(LED, LOW);  delay(100);
+    }
+  } else {
+    Serial.print("Gefunden: ");
+    Serial.print(foundCount);
+    Serial.println(" Motor(en)");
+
+    // LED an
+    digitalWrite(LED, HIGH);
+
+    // Wheel-Mode + drehen
+    for (int i = 0; i < foundCount; i++) {
+      int id = foundIDs[i];
+      Serial.print("Starte Motor ID: ");
+      Serial.println(id);
+      st.WheelMode(id);
+      delay(50);
+      st.WriteSpe(id, 1000, 0);
+    }
+  }
 }
 
-void loop()
-{
-  Position[0] = 3000;  // Set the target position of the servo with ID[0] (in this case ID 1) in the range 0-4095
-  Position[1] = 3000;  // Set the target position of the servo with ID[1] (here with ID 2) in the range 0-4095
-  st.SyncWritePosEx(ID, 2, Position, Speed, ACC);//servo(ID1/ID2) speed=3400，acc=50，move to position=3000.
-  delay(2000);
-
-  Position[0] = 100;
-  Position[1] = 100;
-  st.SyncWritePosEx(ID, 2, Position, Speed, ACC);//servo(ID1/ID2) speed=3400，acc=50，move to position=100.
-  delay(2000);
+void loop() {
+  // Motoren laufen bis Reset
 }
